@@ -1,21 +1,22 @@
 body {
-    background: linear-gradient(135deg, #232526 0%, #414345 100%);
+    background: linear-gradient(135deg, #ab29cc 0%, #320ed4 100%);
     font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
     min-height: 100vh;
     margin: 0;
 }
 
 .chat-container {
-    width: 420px;
+    width: 620px;
     margin: 60px auto;
     background: rgba(30, 32, 40, 0.95);
     border-radius: 18px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    box-shadow: 0 8px 32px 0 rgba(37, 47, 190, 0.37);
     padding: 28px 24px 18px 24px;
     backdrop-filter: blur(6px);
-    border: 1.5px solid rgba(255,255,255,0.08);
+    border: 1.5px solid #00ffe7;
     position: relative;
     overflow: hidden;
+    
 }
 
 .chat-container::before {
@@ -42,7 +43,7 @@ h2 {
 #chat-box {
     height: 320px;
     overflow-y: auto;
-    border: 1.5px solid #232b3a;
+    border: 1.5px solid #00ffe7;
     padding: 14px;
     margin-bottom: 16px;
     background: rgba(25, 27, 34, 0.92);
