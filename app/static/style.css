@@ -1,20 +1,20 @@
 /*Define o visual da interface web do chatbot*/
 body {
-    background: linear-gradient(135deg, #232526 0%, #414345 100%);
+    background: linear-gradient(110deg, rgb(97, 53, 133), rgb(108, 54, 116), rgb(42, 42, 110));
     font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
     min-height: 100vh;
     margin: 0;
 }
 
 .chat-container {
-    width: 420px;
+    width: 900px;
     margin: 60px auto;
-    background: rgba(30, 32, 40, 0.95);
+    background: rgba(72, 28, 112, 0.95);
     border-radius: 18px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    box-shadow: 0 8px 32px 0 rgba(43, 4, 105, 0.37);
     padding: 28px 24px 18px 24px;
     backdrop-filter: blur(6px);
-    border: 1.5px solid rgba(255,255,255,0.08);
+    border: 1.5px solid rgb(55, 90, 206);
     position: relative;
     overflow: hidden;
 }
@@ -41,9 +41,9 @@ h2 {
 }
 
 #chat-box {
-    height: 320px;
+    height: 500px;
     overflow-y: auto;
-    border: 1.5px solid #232b3a;
+    border: 1.5px solid #2216ca;
     padding: 14px;
     margin-bottom: 16px;
     background: rgba(25, 27, 34, 0.92);
