@@ -1,7 +1,7 @@
 import google.generativeai as genai
 import os
-from dotenv import load_dotenv # Importe load_dotenv
-from app.crawler import obter_conteudo_site # Certifique-se que o import está correto
+from dotenv import load_dotenv
+from app.crawler import obter_conteudo_site
 
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -22,8 +22,6 @@ def responder_com_base_site_arquivo(pergunta: str, url: str, caminho_arquivo: st
     """
     
     # Define um limite de caracteres maior para aproveitar o grande contexto do Gemini 1.5 Flash
-    # 20.000 caracteres é um bom ponto de partida, mas pode ser ajustado dependendo da necessidade
-    # O Gemini 1.5 Flash tem um contexto de 1 milhão de tokens, então 20k chars (~5k tokens) é seguro.
     MAX_CHARS_FOR_CONTEXT = 20000 
 
     # Busca conteúdo do site
@@ -36,7 +34,7 @@ def responder_com_base_site_arquivo(pergunta: str, url: str, caminho_arquivo: st
     try:
         with open(caminho_arquivo, "r", encoding="utf-8") as f:
             texto_arquivo = f.read()
-        print("Conteúdo lido do arquivo:", texto_arquivo)
+        print("Conteúdo lido do arquivo:", texto_arquivo[:200] + "...")
     except FileNotFoundError:
         texto_arquivo = "O arquivo não foi encontrado."
     except Exception as e:
@@ -45,21 +43,19 @@ def responder_com_base_site_arquivo(pergunta: str, url: str, caminho_arquivo: st
     texto_arquivo_limitado = texto_arquivo[:MAX_CHARS_FOR_CONTEXT]
 
     # Monta o prompt unindo as duas fontes
-    # Prompt mais robusto e claro para o Gemini
     prompt_template = (
-        f"- Você é um assistente virtual brasileiro especializado em responder perguntas com base em informações fornecidas.\n"
+        f"- Você é um assistente virtual brasileiro especializado em responder perguntas sobre o Programa Jovem Programador.\n"
         f"- Sua tarefa é analisar o 'Conteúdo do site' e o 'Conteúdo do arquivo' abaixo para responder à 'Pergunta do usuário'.\n"
         f"- Siga estas regras estritamente:\n"
         f"- Responda de forma clara, concisa, objetiva e em português do Brasil.\n"
-        f"- De respostas curtas e diretas, evitando explicações longas ou complexas.\n"
-        f"- Use APENAS as informações presentes no 'Conteúdo do site' e no 'Conteúdo do arquivo'. Não adicione conhecimento externo, opiniões ou inferências próprias.\n"
-        f"- Se a pergunta do usuário for uma saudação (ex: 'oi', 'olá', 'tudo bem?'), responda com uma saudação amigável.\n"
-        f"- Se a pergunta NÃO puder ser respondida com as informações fornecidas, diga educadamente: 'Desculpe, não tenho informações suficientes para responder a essa pergunta com base nos dados fornecidos.'\n"
-        f"- Evite repetições e informações irrelevantes na sua resposta.\n"
+        f"- Dê respostas curtas e diretas, evitando explicações longas ou complexas.\n"
+        f"- Use APENAS as informações presentes no 'Conteúdo do site' e no 'Conteúdo do arquivo'. Não adicione conhecimento externo.\n"
+        f"- Se a pergunta for uma saudação (ex: 'oi', 'olá', 'tudo bem?'), responda com uma saudação amigável.\n"
+        f"- Se a pergunta NÃO puder ser respondida com as informações fornecidas, diga: 'Desculpe, não tenho informações suficientes para responder a essa pergunta com base nos dados fornecidos.'\n"
         f"- Seja educado e profissional em suas interações.\n"
-        f"- Limite sua resposta a 256 tokens para manter a brevidade.\n"
-        f"- Se a data dos eventos forem no passado, use o tempo verbal passado. Se forem no futuro, use o tempo verbal futuro.\n"
-        
+        f"- Limite sua resposta a 200 tokens para manter a brevidade.\n"
+        f"- Se a data dos eventos for no passado, use o tempo verbal passado. Se for no futuro, use o tempo verbal futuro.\n"
+        f"- Sempre termine com uma pergunta amigável como 'Posso ajudar com mais alguma coisa?' ou similar.\n"
         
         f"--- Conteúdo do Site ({url}) ---\n"
         f"{texto_site_limitado}\n"
@@ -78,14 +74,13 @@ def responder_com_base_site_arquivo(pergunta: str, url: str, caminho_arquivo: st
 
     try:
         # Verifica se a pergunta é uma saudação
-        saudacoes = ["oi", "olá", "oi, tudo bem?", "olá, tudo bem?", "oi, tudo bem com você?", "tudo bem?"]
+        saudacoes = ["oi", "olá", "oi, tudo bem?", "olá, tudo bem?", "oi, tudo bem com você?", "tudo bem?", "hello", "hi", "hola"]
         if pergunta.lower().strip() in saudacoes:
-            return "Olá! Como posso ajudar?"
+            return "Olá! Sou o assistente do Programa Jovem Programador. Como posso ajudar você hoje?"
 
         response = model.generate_content(prompt_template)
-        # return response.text.strip()
-        # Adiciona a pergunta final à resposta do Gemini
-        return f"{response.text.strip()} Posso ajudar com mais alguma coisa?"
+        return response.text.strip()
+        
     except Exception as e:
         print(f"Erro ao processar solicitação: {e}")
-        return f"Ocorreu um erro ao processar sua solicitação: {e} Posso ajudar com mais alguma coisa?"
+        return f"Ocorreu um erro ao processar sua solicitação. Tente novamente em alguns instantes."
