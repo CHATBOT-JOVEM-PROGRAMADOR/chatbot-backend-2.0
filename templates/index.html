@@ -57,7 +57,7 @@
         <img src="{{ url_for('static', filename='chat.png') }}" alt="Chat">
     </button>
 
-    <!-- Chat Container - CENTRALIZADO -->
+    <!-- Chat Container - CENTRALIZADO E MAIOR -->
     <div id="chat-container" class="chat-container">
         <div class="chat-header">
             <h2 id="chat-title">FALA BOT</h2>
@@ -78,7 +78,6 @@
     <script src="{{ url_for('static', filename='translations.js') }}"></script>
     <script>
         let chatOpen = false;
-        let isLoading = false;
 
         function toggleChat() {
             const container = document.getElementById('chat-container');
@@ -111,21 +110,13 @@
         const form = document.getElementById('chat-form');
         const chatBox = document.getElementById('chat-box');
         
-        // Função para enviar mensagem
+        // Função para enviar mensagem - SEM BLOQUEIOS
         async function sendMessage() {
-            if (isLoading) return;
-            
             const pergunta = document.getElementById('pergunta').value.trim();
             
             if (!pergunta) return;
             
-            isLoading = true;
-            const sendButton = document.getElementById('send-button');
             const perguntaInput = document.getElementById('pergunta');
-            
-            sendButton.disabled = true;
-            perguntaInput.disabled = true;
-            
             const t = translations[currentLanguage()];
             
             // Add user message
@@ -137,13 +128,15 @@
             `;
             chatBox.appendChild(userMessage);
             
-            // Clear input
+            // Clear input IMMEDIATELY
             perguntaInput.value = '';
+            perguntaInput.focus();
             
             // Add loading indicator
             const loadingMessage = document.createElement('div');
             loadingMessage.className = 'bot';
-            loadingMessage.id = 'loading-message';
+            const loadingId = 'loading-message-' + Date.now();
+            loadingMessage.id = loadingId;
             loadingMessage.innerHTML = `
                 <b>${t.botLabel}</b>
                 <div class="message-content">
@@ -173,7 +166,7 @@
                 const data = await resp.json();
                 
                 // Remove loading message
-                const loadingEl = document.getElementById('loading-message');
+                const loadingEl = document.getElementById(loadingId);
                 if (loadingEl) {
                     chatBox.removeChild(loadingEl);
                 }
@@ -191,7 +184,7 @@
                 console.error('Erro na requisição:', error);
                 
                 // Remove loading message
-                const loadingEl = document.getElementById('loading-message');
+                const loadingEl = document.getElementById(loadingId);
                 if (loadingEl) {
                     chatBox.removeChild(loadingEl);
                 }
@@ -205,10 +198,6 @@
                 `;
                 chatBox.appendChild(errorMessage);
             } finally {
-                isLoading = false;
-                sendButton.disabled = false;
-                perguntaInput.disabled = false;
-                perguntaInput.focus();
                 // Scroll to bottom
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
@@ -220,9 +209,9 @@
             sendMessage();
         });
 
-        // Event listener para a tecla Enter
+        // Event listener para a tecla Enter - SEM BLOQUEIOS
         document.getElementById('pergunta').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+            if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
             }
