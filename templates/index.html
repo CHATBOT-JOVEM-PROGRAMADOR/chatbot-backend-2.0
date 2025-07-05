@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Language Selector -->
+    <!-- Language Selector - Canto Superior Esquerdo -->
     <div class="language-selector">
         <label id="language-label">Idioma:</label>
         <select id="language-select" onchange="setLanguage(this.value)">
@@ -19,8 +19,8 @@
 
     <!-- Welcome Screen -->
     <div class="welcome-screen">
-        <h1 class="welcome-title">FALA BOT</h1>
-        <p class="welcome-subtitle">
+        <h1 class="welcome-title" id="welcome-title">FALA BOT</h1>
+        <p class="welcome-subtitle" id="welcome-subtitle">
             Seu assistente inteligente para informações sobre o Programa Jovem Programador. 
             Clique no botão de chat para começar a conversar!
         </p>
@@ -28,31 +28,31 @@
         <div class="welcome-features">
             <div class="feature-card">
                 <div class="feature-icon">🤖</div>
-                <div class="feature-title">Assistente IA</div>
-                <div class="feature-description">
+                <div class="feature-title" id="feature-ai-title">Assistente IA</div>
+                <div class="feature-description" id="feature-ai-desc">
                     Powered by Google Gemini para respostas precisas e contextuais
                 </div>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon">🌍</div>
-                <div class="feature-title">Multilíngue</div>
-                <div class="feature-description">
+                <div class="feature-title" id="feature-lang-title">Multilíngue</div>
+                <div class="feature-description" id="feature-lang-desc">
                     Suporte para Português, Inglês e Espanhol
                 </div>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon">💬</div>
-                <div class="feature-title">Chat Intuitivo</div>
-                <div class="feature-description">
+                <div class="feature-title" id="feature-chat-title">Chat Intuitivo</div>
+                <div class="feature-description" id="feature-chat-desc">
                     Interface moderna e responsiva para melhor experiência
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Floating Chat Button -->
+    <!-- Floating Chat Button - Canto Superior Direito -->
     <button id="chat-button" class="chat-button" onclick="toggleChat()">
         <img src="{{ url_for('static', filename='chat.png') }}" alt="Chat">
     </button>
@@ -78,6 +78,7 @@
     <script src="{{ url_for('static', filename='translations.js') }}"></script>
     <script>
         let chatOpen = false;
+        let isLoading = false;
 
         function toggleChat() {
             const container = document.getElementById('chat-container');
@@ -88,7 +89,7 @@
             if (chatOpen) {
                 container.classList.add('active');
                 button.classList.add('active');
-                button.title = translations[currentLanguage()].closeChat;
+                updateChatButtonTitle();
                 // Focus on input when chat opens
                 setTimeout(() => {
                     document.getElementById('pergunta').focus();
@@ -96,8 +97,14 @@
             } else {
                 container.classList.remove('active');
                 button.classList.remove('active');
-                button.title = translations[currentLanguage()].openChat;
+                updateChatButtonTitle();
             }
+        }
+
+        function updateChatButtonTitle() {
+            const button = document.getElementById('chat-button');
+            const t = translations[currentLanguage()];
+            button.title = chatOpen ? t.closeChat : t.openChat;
         }
 
         // Chat functionality
@@ -106,9 +113,16 @@
         
         form.onsubmit = async (e) => {
             e.preventDefault();
+            
+            if (isLoading) return;
+            
             const pergunta = document.getElementById('pergunta').value.trim();
             
             if (!pergunta) return;
+            
+            isLoading = true;
+            const sendButton = document.getElementById('send-button');
+            sendButton.disabled = true;
             
             const t = translations[currentLanguage()];
             
@@ -117,7 +131,7 @@
             userMessage.className = 'user';
             userMessage.innerHTML = `
                 <b>${t.userLabel}</b>
-                <div class="message-content">${pergunta}</div>
+                <div class="message-content">${escapeHtml(pergunta)}</div>
             `;
             chatBox.appendChild(userMessage);
             
@@ -127,9 +141,16 @@
             // Add loading indicator
             const loadingMessage = document.createElement('div');
             loadingMessage.className = 'bot';
+            loadingMessage.id = 'loading-message';
             loadingMessage.innerHTML = `
                 <b>${t.botLabel}</b>
-                <div class="message-content">...</div>
+                <div class="message-content">
+                    <div class="loading-dots">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
             `;
             chatBox.appendChild(loadingMessage);
             
@@ -143,37 +164,63 @@
                     body: JSON.stringify({pergunta})
                 });
                 
+                if (!resp.ok) {
+                    throw new Error(`HTTP error! status: ${resp.status}`);
+                }
+                
                 const data = await resp.json();
                 
                 // Remove loading message
-                chatBox.removeChild(loadingMessage);
+                const loadingEl = document.getElementById('loading-message');
+                if (loadingEl) {
+                    chatBox.removeChild(loadingEl);
+                }
                 
                 // Add bot response
                 const botMessage = document.createElement('div');
                 botMessage.className = 'bot';
                 botMessage.innerHTML = `
                     <b>${t.botLabel}</b>
-                    <div class="message-content">${data.resposta}</div>
+                    <div class="message-content">${escapeHtml(data.resposta || 'Desculpe, não recebi uma resposta válida.')}</div>
                 `;
                 chatBox.appendChild(botMessage);
                 
             } catch (error) {
+                console.error('Erro na requisição:', error);
+                
                 // Remove loading message
-                chatBox.removeChild(loadingMessage);
+                const loadingEl = document.getElementById('loading-message');
+                if (loadingEl) {
+                    chatBox.removeChild(loadingEl);
+                }
                 
                 // Add error message
                 const errorMessage = document.createElement('div');
                 errorMessage.className = 'bot';
                 errorMessage.innerHTML = `
                     <b>${t.botLabel}</b>
-                    <div class="message-content">Desculpe, ocorreu um erro. Tente novamente.</div>
+                    <div class="message-content">${t.errorMessage || 'Desculpe, ocorreu um erro. Tente novamente.'}</div>
                 `;
                 chatBox.appendChild(errorMessage);
+            } finally {
+                isLoading = false;
+                sendButton.disabled = false;
+                // Scroll to bottom
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
-            
-            // Scroll to bottom
-            chatBox.scrollTop = chatBox.scrollHeight;
         };
+
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
 
         // Initialize language on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -182,7 +229,7 @@
 
         // Handle Enter key in input
         document.getElementById('pergunta').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
                 e.preventDefault();
                 form.dispatchEvent(new Event('submit'));
             }
