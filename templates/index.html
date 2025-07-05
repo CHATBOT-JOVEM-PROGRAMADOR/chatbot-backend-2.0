@@ -57,7 +57,7 @@
         <img src="{{ url_for('static', filename='chat.png') }}" alt="Chat">
     </button>
 
-    <!-- Chat Container -->
+    <!-- Chat Container - CENTRALIZADO -->
     <div id="chat-container" class="chat-container">
         <div class="chat-header">
             <h2 id="chat-title">FALA BOT</h2>
@@ -111,9 +111,8 @@
         const form = document.getElementById('chat-form');
         const chatBox = document.getElementById('chat-box');
         
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            
+        // Função para enviar mensagem
+        async function sendMessage() {
             if (isLoading) return;
             
             const pergunta = document.getElementById('pergunta').value.trim();
@@ -122,7 +121,10 @@
             
             isLoading = true;
             const sendButton = document.getElementById('send-button');
+            const perguntaInput = document.getElementById('pergunta');
+            
             sendButton.disabled = true;
+            perguntaInput.disabled = true;
             
             const t = translations[currentLanguage()];
             
@@ -136,7 +138,7 @@
             chatBox.appendChild(userMessage);
             
             // Clear input
-            document.getElementById('pergunta').value = '';
+            perguntaInput.value = '';
             
             // Add loading indicator
             const loadingMessage = document.createElement('div');
@@ -205,10 +207,26 @@
             } finally {
                 isLoading = false;
                 sendButton.disabled = false;
+                perguntaInput.disabled = false;
+                perguntaInput.focus();
                 // Scroll to bottom
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
-        };
+        }
+
+        // Event listener para o formulário
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            sendMessage();
+        });
+
+        // Event listener para a tecla Enter
+        document.getElementById('pergunta').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
 
         // Utility function to escape HTML
         function escapeHtml(text) {
@@ -225,14 +243,6 @@
         // Initialize language on page load
         document.addEventListener('DOMContentLoaded', function() {
             initializeLanguage();
-        });
-
-        // Handle Enter key in input
-        document.getElementById('pergunta').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
-                e.preventDefault();
-                form.dispatchEvent(new Event('submit'));
-            }
         });
 
         // Close chat when clicking outside
