@@ -68,7 +68,7 @@
         
         <div id="chat-box"></div>
         
-        <form id="chat-form">
+        <form id="chat-form" onsubmit="handleFormSubmit(event)">
             <input type="text" id="pergunta" placeholder="Digite sua pergunta..." autocomplete="off" required>
             <button type="submit" id="send-button">Enviar</button>
         </form>
@@ -91,7 +91,10 @@
                 updateChatButtonTitle();
                 // Focus on input when chat opens
                 setTimeout(() => {
-                    document.getElementById('pergunta').focus();
+                    const perguntaInput = document.getElementById('pergunta');
+                    if (perguntaInput) {
+                        perguntaInput.focus();
+                    }
                 }, 400);
             } else {
                 container.classList.remove('active');
@@ -106,17 +109,23 @@
             button.title = chatOpen ? t.closeChat : t.openChat;
         }
 
-        // Chat functionality
-        const form = document.getElementById('chat-form');
-        const chatBox = document.getElementById('chat-box');
-        
         // Função para enviar mensagem - SEM BLOQUEIOS
         async function sendMessage() {
-            const pergunta = document.getElementById('pergunta').value.trim();
-            
-            if (!pergunta) return;
-            
             const perguntaInput = document.getElementById('pergunta');
+            const chatBox = document.getElementById('chat-box');
+            
+            if (!perguntaInput || !chatBox) {
+                console.error('Elementos do chat não encontrados');
+                return;
+            }
+            
+            const pergunta = perguntaInput.value.trim();
+            
+            if (!pergunta) {
+                perguntaInput.focus();
+                return;
+            }
+            
             const t = translations[currentLanguage()];
             
             // Add user message
@@ -132,10 +141,10 @@
             perguntaInput.value = '';
             perguntaInput.focus();
             
-            // Add loading indicator
+            // Add loading indicator with unique ID
+            const loadingId = 'loading-message-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
             const loadingMessage = document.createElement('div');
             loadingMessage.className = 'bot';
-            const loadingId = 'loading-message-' + Date.now();
             loadingMessage.id = loadingId;
             loadingMessage.innerHTML = `
                 <b>${t.botLabel}</b>
@@ -167,8 +176,8 @@
                 
                 // Remove loading message
                 const loadingEl = document.getElementById(loadingId);
-                if (loadingEl) {
-                    chatBox.removeChild(loadingEl);
+                if (loadingEl && loadingEl.parentNode) {
+                    loadingEl.parentNode.removeChild(loadingEl);
                 }
                 
                 // Add bot response
@@ -185,8 +194,8 @@
                 
                 // Remove loading message
                 const loadingEl = document.getElementById(loadingId);
-                if (loadingEl) {
-                    chatBox.removeChild(loadingEl);
+                if (loadingEl && loadingEl.parentNode) {
+                    loadingEl.parentNode.removeChild(loadingEl);
                 }
                 
                 // Add error message
@@ -200,22 +209,26 @@
             } finally {
                 // Scroll to bottom
                 chatBox.scrollTop = chatBox.scrollHeight;
+                // Ensure input stays focused
+                perguntaInput.focus();
             }
         }
 
-        // Event listener para o formulário
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Handle form submit
+        function handleFormSubmit(event) {
+            event.preventDefault();
             sendMessage();
-        });
+            return false;
+        }
 
-        // Event listener para a tecla Enter - SEM BLOQUEIOS
-        document.getElementById('pergunta').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
+        // Handle Enter key
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
                 sendMessage();
+                return false;
             }
-        });
+        }
 
         // Utility function to escape HTML
         function escapeHtml(text) {
@@ -229,9 +242,30 @@
             return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
 
-        // Initialize language on page load
+        // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing chat...');
+            
+            // Initialize language
             initializeLanguage();
+            
+            // Setup event listeners
+            const perguntaInput = document.getElementById('pergunta');
+            const chatForm = document.getElementById('chat-form');
+            
+            if (perguntaInput) {
+                perguntaInput.addEventListener('keydown', handleKeyDown);
+                console.log('Enter key listener added');
+            } else {
+                console.error('Input pergunta não encontrado');
+            }
+            
+            if (chatForm) {
+                chatForm.addEventListener('submit', handleFormSubmit);
+                console.log('Form submit listener added');
+            } else {
+                console.error('Form chat não encontrado');
+            }
         });
 
         // Close chat when clicking outside
@@ -239,14 +273,20 @@
             const container = document.getElementById('chat-container');
             const button = document.getElementById('chat-button');
             
-            if (chatOpen && !container.contains(e.target) && !button.contains(e.target)) {
+            if (chatOpen && container && button && 
+                !container.contains(e.target) && !button.contains(e.target)) {
                 toggleChat();
             }
         });
 
         // Prevent chat from closing when clicking inside
-        document.getElementById('chat-container').addEventListener('click', function(e) {
-            e.stopPropagation();
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chat-container');
+            if (chatContainer) {
+                chatContainer.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
         });
     </script>
 </body>
