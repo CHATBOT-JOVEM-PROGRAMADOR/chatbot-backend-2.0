@@ -7,7 +7,7 @@ chatbot_api = Blueprint('chatbot_api', __name__)
 def chat():
     data = request.get_json()
     pergunta = data.get('pergunta', '')
-    url = "https://www.jovemprogramador.com.br"  # Ou outro site desejado
-    caminho_arquivo = "content.txt"
+    url = "https://www.jovemprogramador.com.br"  # Site de busca de informações
+    caminho_arquivo = "content.txt"              # Caminho do arquivo de conteúdo
     resposta = responder_com_base_site_arquivo(pergunta, url, caminho_arquivo)
     return jsonify({'resposta': resposta})

@@ -1,293 +1,37 @@
+<!--Interface web do chatbot. Permite ao usuário enviar perguntas e exibe as respostas.-->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FALA BOT - Assistente Inteligente</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Chatbot Inteligente</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Language Selector - Canto Superior Esquerdo -->
-    <div class="language-selector">
-        <label id="language-label">Idioma:</label>
-        <select id="language-select" onchange="setLanguage(this.value)">
-            <option value="pt">🇧🇷 Português</option>
-            <option value="en">🇺🇸 English</option>
-            <option value="es">🇪🇸 Español</option>
-        </select>
-    </div>
-
-    <!-- Welcome Screen -->
-    <div class="welcome-screen">
-        <h1 class="welcome-title" id="welcome-title">FALA BOT</h1>
-        <p class="welcome-subtitle" id="welcome-subtitle">
-            Seu assistente inteligente para informações sobre o Programa Jovem Programador. 
-            Clique no botão de chat para começar a conversar!
-        </p>
-        
-        <div class="welcome-features">
-            <div class="feature-card">
-                <div class="feature-icon">🤖</div>
-                <div class="feature-title" id="feature-ai-title">Assistente IA</div>
-                <div class="feature-description" id="feature-ai-desc">
-                    Powered by Google Gemini para respostas precisas e contextuais
-                </div>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">🌍</div>
-                <div class="feature-title" id="feature-lang-title">Multilíngue</div>
-                <div class="feature-description" id="feature-lang-desc">
-                    Suporte para Português, Inglês e Espanhol
-                </div>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">💬</div>
-                <div class="feature-title" id="feature-chat-title">Chat Intuitivo</div>
-                <div class="feature-description" id="feature-chat-desc">
-                    Interface moderna e responsiva para melhor experiência
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Floating Chat Button - Canto Superior Direito -->
-    <button id="chat-button" class="chat-button" onclick="toggleChat()">
-        <img src="{{ url_for('static', filename='chat.png') }}" alt="Chat">
-    </button>
-
-    <!-- Chat Container - CENTRALIZADO E MAIOR -->
-    <div id="chat-container" class="chat-container">
-        <div class="chat-header">
-            <h2 id="chat-title">FALA BOT</h2>
-            <div class="chat-controls">
-                <button class="control-btn" onclick="toggleChat()" title="Fechar">×</button>
-            </div>
-        </div>
-        
+    <div class="chat-container">
+        <h2>Chatbot Inteligente</h2>
         <div id="chat-box"></div>
-        
-        <form id="chat-form" onsubmit="handleFormSubmit(event)">
+        <form id="chat-form">
             <input type="text" id="pergunta" placeholder="Digite sua pergunta..." autocomplete="off" required>
-            <button type="submit" id="send-button">Enviar</button>
+            <button type="submit">Enviar</button>
         </form>
     </div>
-
-    <!-- Scripts -->
-    <script src="{{ url_for('static', filename='translations.js') }}"></script>
     <script>
-        let chatOpen = false;
-
-        function toggleChat() {
-            const container = document.getElementById('chat-container');
-            const button = document.getElementById('chat-button');
-            
-            chatOpen = !chatOpen;
-            
-            if (chatOpen) {
-                container.classList.add('active');
-                button.classList.add('active');
-                updateChatButtonTitle();
-                // Focus on input when chat opens
-                setTimeout(() => {
-                    const perguntaInput = document.getElementById('pergunta');
-                    if (perguntaInput) {
-                        perguntaInput.focus();
-                    }
-                }, 400);
-            } else {
-                container.classList.remove('active');
-                button.classList.remove('active');
-                updateChatButtonTitle();
-            }
-        }
-
-        function updateChatButtonTitle() {
-            const button = document.getElementById('chat-button');
-            const t = translations[currentLanguage()];
-            button.title = chatOpen ? t.closeChat : t.openChat;
-        }
-
-        // Função para enviar mensagem - SEM BLOQUEIOS
-        async function sendMessage() {
-            const perguntaInput = document.getElementById('pergunta');
-            const chatBox = document.getElementById('chat-box');
-            
-            if (!perguntaInput || !chatBox) {
-                console.error('Elementos do chat não encontrados');
-                return;
-            }
-            
-            const pergunta = perguntaInput.value.trim();
-            
-            if (!pergunta) {
-                perguntaInput.focus();
-                return;
-            }
-            
-            const t = translations[currentLanguage()];
-            
-            // Add user message
-            const userMessage = document.createElement('div');
-            userMessage.className = 'user';
-            userMessage.innerHTML = `
-                <b>${t.userLabel}</b>
-                <div class="message-content">${escapeHtml(pergunta)}</div>
-            `;
-            chatBox.appendChild(userMessage);
-            
-            // Clear input IMMEDIATELY
-            perguntaInput.value = '';
-            perguntaInput.focus();
-            
-            // Add loading indicator with unique ID
-            const loadingId = 'loading-message-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-            const loadingMessage = document.createElement('div');
-            loadingMessage.className = 'bot';
-            loadingMessage.id = loadingId;
-            loadingMessage.innerHTML = `
-                <b>${t.botLabel}</b>
-                <div class="message-content">
-                    <div class="loading-dots">
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                    </div>
-                </div>
-            `;
-            chatBox.appendChild(loadingMessage);
-            
-            // Scroll to bottom
+        const form = document.getElementById('chat-form');
+        const chatBox = document.getElementById('chat-box');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const pergunta = document.getElementById('pergunta').value;
+            chatBox.innerHTML += `<div class="user"><b>Você:</b> ${pergunta}</div>`;
+            document.getElementById('pergunta').value = '';
+            const resp = await fetch('/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({pergunta})
+            });
+            const data = await resp.json();
+            chatBox.innerHTML += `<div class="bot"><b>Bot:</b> ${data.resposta}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
-            
-            try {
-                const resp = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({pergunta})
-                });
-                
-                if (!resp.ok) {
-                    throw new Error(`HTTP error! status: ${resp.status}`);
-                }
-                
-                const data = await resp.json();
-                
-                // Remove loading message
-                const loadingEl = document.getElementById(loadingId);
-                if (loadingEl && loadingEl.parentNode) {
-                    loadingEl.parentNode.removeChild(loadingEl);
-                }
-                
-                // Add bot response
-                const botMessage = document.createElement('div');
-                botMessage.className = 'bot';
-                botMessage.innerHTML = `
-                    <b>${t.botLabel}</b>
-                    <div class="message-content">${escapeHtml(data.resposta || 'Desculpe, não recebi uma resposta válida.')}</div>
-                `;
-                chatBox.appendChild(botMessage);
-                
-            } catch (error) {
-                console.error('Erro na requisição:', error);
-                
-                // Remove loading message
-                const loadingEl = document.getElementById(loadingId);
-                if (loadingEl && loadingEl.parentNode) {
-                    loadingEl.parentNode.removeChild(loadingEl);
-                }
-                
-                // Add error message
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'bot';
-                errorMessage.innerHTML = `
-                    <b>${t.botLabel}</b>
-                    <div class="message-content">${t.errorMessage || 'Desculpe, ocorreu um erro. Tente novamente.'}</div>
-                `;
-                chatBox.appendChild(errorMessage);
-            } finally {
-                // Scroll to bottom
-                chatBox.scrollTop = chatBox.scrollHeight;
-                // Ensure input stays focused
-                perguntaInput.focus();
-            }
-        }
-
-        // Handle form submit
-        function handleFormSubmit(event) {
-            event.preventDefault();
-            sendMessage();
-            return false;
-        }
-
-        // Handle Enter key
-        function handleKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-                return false;
-            }
-        }
-
-        // Utility function to escape HTML
-        function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-        }
-
-        // Initialize everything when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing chat...');
-            
-            // Initialize language
-            initializeLanguage();
-            
-            // Setup event listeners
-            const perguntaInput = document.getElementById('pergunta');
-            const chatForm = document.getElementById('chat-form');
-            
-            if (perguntaInput) {
-                perguntaInput.addEventListener('keydown', handleKeyDown);
-                console.log('Enter key listener added');
-            } else {
-                console.error('Input pergunta não encontrado');
-            }
-            
-            if (chatForm) {
-                chatForm.addEventListener('submit', handleFormSubmit);
-                console.log('Form submit listener added');
-            } else {
-                console.error('Form chat não encontrado');
-            }
-        });
-
-        // Close chat when clicking outside
-        document.addEventListener('click', function(e) {
-            const container = document.getElementById('chat-container');
-            const button = document.getElementById('chat-button');
-            
-            if (chatOpen && container && button && 
-                !container.contains(e.target) && !button.contains(e.target)) {
-                toggleChat();
-            }
-        });
-
-        // Prevent chat from closing when clicking inside
-        document.addEventListener('DOMContentLoaded', function() {
-            const chatContainer = document.getElementById('chat-container');
-            if (chatContainer) {
-                chatContainer.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-        });
+        };
     </script>
 </body>
 </html>
