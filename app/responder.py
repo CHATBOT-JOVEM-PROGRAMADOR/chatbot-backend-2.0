@@ -15,11 +15,9 @@ if not GEMINI_API_KEY:
     raise ValueError("A variável de ambiente 'GEMINI_API_KEY' não está configurada.")
 
 genai.configure(api_key=GEMINI_API_KEY)
-<<<<<<< HEAD
+
 model = genai.GenerativeModel("gemini-2.0-flash")
-=======
-model = genai.GenerativeModel("gemini-1.5-flash-latest")
->>>>>>> 4b8cf09553540a2070a7d04ea8bb71264c205d2b
+
 
 db = SessionLocal()
 
@@ -64,25 +62,18 @@ def responder_com_base_site_arquivo(pergunta: str, url: str, caminho_arquivo: st
     texto_arquivo = get_ou_salvar_conteudo("arquivo", caminho_arquivo, leitura_arquivo_func)
 
     prompt = (
-<<<<<<< HEAD
+
         f"--- Conteúdo do Site ({url}) ---\n{texto_site[:MAX_CHARS]}\n"
         f"--- Conteúdo do Arquivo ({caminho_arquivo}) ---\n{texto_arquivo[:MAX_CHARS]}\n"
         f"--- Pergunta do Usuário ---\n{pergunta}\nResposta:\n"
-=======
->>>>>>> 4b8cf09553540a2070a7d04ea8bb71264c205d2b
+
         f"--- Se o usuario falar algo sobre se machucar fisicamente, diga que ele deve buscar ajuda CVV (Centro de Valorização da Vida) pelo telefone 188 ou pelo site cvv.org.br.\n"
         f"--- Você é um assistente virtual brasileiro especializado em responder perguntas com base em informações fornecidas.\n"
         f"--- Responda de forma clara, objetiva e em português do Brasil.\n"
         f"--- Use APENAS as informações presentes no 'Conteúdo do site' e no 'Conteúdo do arquivo'.\n"
         f"--- Fale no formato temporal, dependendo da data das informações. \n"
         f"--- Limite sua resposta a 100 tokens.\n"
-<<<<<<< HEAD
-        
-=======
-        f"--- Conteúdo do Site ({url}) ---\n{texto_site[:MAX_CHARS]}\n"
-        f"--- Conteúdo do Arquivo ({caminho_arquivo}) ---\n{texto_arquivo[:MAX_CHARS]}\n"
-        f"--- Pergunta do Usuário ---\n{pergunta}\nResposta:\n"
->>>>>>> 4b8cf09553540a2070a7d04ea8bb71264c205d2b
+
     )
 
     try:
