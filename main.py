@@ -5,11 +5,13 @@
 
 from flask import Flask, render_template  # Importa o Flask (framework web) e o render_template (para carregar páginas HTML).
 from app.api import chatbot_api           # Importa o "blueprint" da API do chatbot (um módulo separado que organiza as rotas da API).
+from flask_cors import CORS
+
 
 
 app = Flask(__name__, static_folder='static', template_folder='templates')                     # Cria a aplicação Flask.
 app.register_blueprint(chatbot_api)       # Registra o blueprint do chatbot na aplicação principal. Isso ativa as rotas da API.
-
+CORS(app)
 @app.route("/")
 def index():
     return render_template("index.html")  # Define a rota principal ("/") da página. Quando alguém acessar o site, ele carrega o arquivo
