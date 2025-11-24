@@ -1,0 +1,160 @@
+
+<!--Interface web do chatbot. Permite ao usuário enviar perguntas e exibe as respostas.-->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+    <title>HudIA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <!-- TELA DE CARREGAMENTO -->
+    <div id="loading-screen">
+        <canvas id="bg"></canvas>
+        <p class="loading-text">Carregando o HudIA...</p>
+    </div>
+    <div id="main-content" class="hidden">
+
+
+        <!-- Seção Sobre o Projeto -->
+        <section id="sobre-projeto" class="hidden">
+            <h2>Sobre o Projeto</h2>
+            <p>HudIA é um chatbot futurista criado para interagir de forma intuitiva. <br><br>
+               Buscando informações com base nos conteúdos disponíveis no site do Jovem Programador.</p>
+               <br><br><br>  
+               <div class="links-projeto">                  
+                    <a href="https://portal.sc.senac.br/" target="_blank" class="btn-projeto">Senac</a>
+                    <a href="https://www.jovemprogramador.com.br/" target="_blank" class="btn-projeto">Jovem Programador</a>
+                    <a href="https://www.seprosc.com.br/" target="_blank" class="btn-projeto">Seprosc</a>
+                </div>
+        </section>
+
+        <!-- Seção Home / Chatbot -->
+        <section id="chatbot">
+            <h2>HudIA</h2>
+            <p>Bem-vindo ao HudIA! <br><br>
+                Clique no ícone de chat no canto inferior direito<br>
+                para começar a conversar</p>
+            <br><br>
+            <button id="abrir-chat" class="btn-abrir-chat">💬 Abrir Chat HudIA</button>
+        </section>  
+
+        <!-- Seção Contatos -->
+        <section id="contatos" class="hidden">
+            <h2>Contatos</h2>
+            <div class="contatos-container">
+                <div class="contato">
+                <p><strong>Alan Mengarda</strong></p>
+                <p>Email:<br> alan.mengarda@gmail.com</p>
+                <p>LinkedIn:<br> <a href="https://www.linkedin.com/in/alan-mengarda93/" target="_blank">ALAN MENGARDA</a></p>
+                </div>
+
+                <div class="contato">
+                <p><strong>Yuri Gonçalves</strong></p>
+                <p>Email:<br> yuri.goncalves@gmail.com</p>
+                <p>LinkedIn:<br> <a href="#" target="_blank">YURI GONÇALVES</a></p>
+                </div>
+
+                <div class="contato">
+                <p><strong>Aristóteles Daltro</strong></p>
+                <p>Email:<br> aristoteles.daltro@gmail.com</p>
+                <p>LinkedIn:<br> <a href="#" target="_blank">ARISTOTELES DALTRO</a></p>
+                </div>
+
+                <div class="contato">
+                <p><strong>Felipe Crosara</strong></p>
+                <p>Email:<br> felipe.crosara@gmail.com</p>
+                <p>LinkedIn:<br> <a href="#" target="_blank">FELIPE CROSARA</a></p>
+                </div>
+            </div>
+        </section>
+    </div>
+        <!-- NAVBAR FUTURISTA -->
+    <nav class="futuristic-navbar hidden">
+        <div class="logo">HudIA</div>
+            <ul class="nav-links">
+                <li><a href="javascript:void(0)" onclick="mostrarSecao('sobre-projeto')">Sobre o Projeto</a></li>                
+                <li><a href="javascript:void(0)" onclick="mostrarSecao('chatbot')">Chatbot</a></li>
+                <li><a href="javascript:void(0)" onclick="mostrarSecao('contatos')">Contatos</a></li>
+                    
+            </ul>
+    </nav>
+        <div style="text-align: center; margin-top: 10px;">
+            <button id="theme-toggle" class="theme-button">🌙</button>
+        </div>     
+                    <!-- Botão flutuante TTS -->
+            <!-- Botão flutuante -->
+            <div id="tts-icon" title="Leitor de Texto 🎧">🎧</div>
+
+                <!-- Painel TTS -->
+                 
+                    <div id="tts-panel" class="hidden">
+                        <div id="tts-header">
+                            <span>Leitor de Texto 🎧</span>
+                            <div class="tts-controls">
+                                <button id="close-tts" title="Fechar">✖</button>
+                            </div>
+                        </div>
+                        
+                        <textarea id="tts-text" placeholder="Selecione texto na página..." rows="3"></textarea>
+
+                        <div id="tts-buttons">
+                            <button id="tts-play">&#9654;</button>
+                            <button id="tts-pause">&#9208;</button>
+                        <!--<button id="tts-stop">⏹️</button>-->
+                        </div>
+
+                        <div id="tts-resize-handle"></div>
+                    </div>
+
+
+
+        <!-- ÍCONE DO CHAT -->
+    <div id="chat-icon" title="Abrir HudIA 💬">💬</div>
+
+    <!-- JANELA DO CHAT -->
+    <div id="chat-widget" class="hidden">
+        <div class="chat-header">
+            <span>Hudia</span>
+            <div class="chat-controls">
+                <button id="close-chat" title="Fechar">✖</button>
+            </div>
+        </div>
+        <div id="chat-box"></div>
+        <form id="chat-form">
+            <input type="text" id="pergunta" placeholder="Digite sua pergunta..." autocomplete="off" required>
+            <!-- Botão microfone -->
+            <button type="button" id="mic-btn" title="Falar" aria-pressed="false">🎤</button>
+            <button type="button" id="read-btn" title="Ouvir resposta">🔊</button>
+            <button type="submit" id="btn-enviar">Enviar</button>
+        </form>
+        <div id="resize-handle"></div> <!-- canto de redimensionar -->
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+     <!--    Libras -->
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+    </script>
+     <!-- FOOTER -->
+    <footer class="footer">
+        <p>© 2025 HudIA. Todos os direitos reservados.</p>
+    </footer>
+</body>
+</html>
