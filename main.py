@@ -5,6 +5,8 @@
 
 from flask import Flask, render_template  # Importa o Flask (framework web) e o render_template (para carregar páginas HTML).
 from app.api import chatbot_api           # Importa o "blueprint" da API do chatbot (um módulo separado que organiza as rotas da API).
+from flask_cors import CORS
+CORS(app)
 
 
 app = Flask(__name__, static_folder='static', template_folder='templates')                     # Cria a aplicação Flask.
