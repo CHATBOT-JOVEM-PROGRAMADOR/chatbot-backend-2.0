@@ -17,7 +17,9 @@ def index():
     return render_template("index.html")  # Define a rota principal ("/") da página. Quando alguém acessar o site, ele carrega o arquivo
 
 if __name__ == "__main__":
-    app.run(debug=True)                   # Inicia o servidor Flask localmente com o modo debug ativado (útil para testes).
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)                   # Inicia o servidor Flask localmente com o modo debug ativado (útil para testes).
 
 #É o ponto de entrada da aplicação Flask. 
 #Inicializa o servidor web, carrega o blueprint da API
